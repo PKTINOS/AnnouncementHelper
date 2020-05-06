@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -24,6 +24,10 @@ namespace MyFirstTeitheApplication
         private static List<Announcement> unreadAnnouncements = new List<Announcement>();
         public static List<Category> categories = new List<Category>();
         private static int[] ids = new int[10];
+
+        const string CLIENT_ID = "5eb300b88d8d2917ed03198d";
+        const string CLIENT_SECRET = "0sy2579v41pxpap3on2e1uigumgrlsfj67pt5rthmbr13hohpw";
+
         enum OutType { 
             normal = 0,
             error = 1,
@@ -70,7 +74,7 @@ namespace MyFirstTeitheApplication
 
             Console.OutputEncoding = Encoding.UTF8;
             Out("Παρακαλώ δώστε εξουσιοδότηση στην εφαρμογή.");
-            Process.Start("https://login.it.teithe.gr/authorization/?client_id=5eaad78975d3025278b778c1&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
+            Process.Start("https://login.it.teithe.gr/authorization/?client_id=" + CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
             Out("Έπειτα, εισάγετε τον αριθμό \"code\" που βλέπετε:");
             string code = Console.ReadLine();
             access_token = await GetToken(code);
@@ -217,8 +221,8 @@ namespace MyFirstTeitheApplication
         {
             var values = new Dictionary<string, string>
             {
-                { "client_id", "5eaad78975d3025278b778c1" },
-                { "client_secret", "3zbgjnm8y3gmuwud4j2xum21qud926lo3tfwsl75obejmovm2h" },
+                { "client_id", CLIENT_ID },
+                { "client_secret", CLIENT_SECRET },
                 { "grant_type", "authorization_code" },
                 { "code" ,code}
             };
