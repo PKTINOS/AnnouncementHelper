@@ -1,88 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
-namespace MyFirstTeitheApplication
+namespace AnnouncementHelper
 {
     public class Announcement
     {
 
         //Δημιουργος ανακοινωσης
-        public Publisher publisher
+        public Publisher Publisher
         {
             get;
             set;
         }
-
         //Τιτλος ανακοινωσης
         public string Title
         {
             get;
             set;
         }
-
         //Περιεχομενο ανακοινωσης
         public string Text
         {
             get;
             set;
         }
-
-        //Χωρος για text χωρις newlines
-        public string editedtext
+        public string[] Attachments
         {
             get;
             set;
         }
-
-        public string[] attachments
+        public string Date
         {
             get;
             set;
         }
-        public string date
+        [JsonProperty(PropertyName = "_about")]
+        public string CategoryId
         {
             get;
             set;
         }
-
-        //Category id
-        public string _about
+        [JsonProperty(PropertyName = "_id")]
+        public string AnnouncementHash
         {
             get;
             set;
         }
-
-        //Hash
-        public string _id
-        {
-            get;
-            set;
-        }
-        public class Publisher
-        {
-            public string id
-            {
-                get;
-                set;
-            }
-            public string name
-            {
-                get;
-                set;
-            }
-        }
-        public string category
+        public string Category
         {
             get
             {
-                foreach (Category c in Program.categories)
+                foreach (Category c in Program.Categories)
                 {
-                    if (c._id == _about)
+                    if (c.Id == CategoryId)
                     {
-                        return c.name;
+                        return c.Name;
                     }
                 }
                 return "?????";
