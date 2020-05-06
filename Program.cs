@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Diagnostics;
@@ -8,63 +7,35 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Text;
-using System.IO;
 using System.Windows.Forms;
-using System.Runtime.CompilerServices;
+using System.IO;
 
-namespace MyFirstTeitheApplication
+namespace AnnouncementHelper
 {
     class Program
     {
-        public static string access_token;
+        // Κωδικοί της εφαρμογής
+        private const string CLIENT_ID = "5eb300b88d8d2917ed03198d";
+        private const string CLIENT_SECRET = "0sy2579v41pxpap3on2e1uigumgrlsfj67pt5rthmbr13hohpw";
+        public const string VERSION = "1.0.2";
+
+        public static List<Announcement> Announcements = new List<Announcement>();
+        public static List<Category> Categories = new List<Category>();
+
+        private static string access_token;
         private static HttpClient client;
         private static Profile userProfile;
-        public static List<Announcement> Announcements = new List<Announcement>();
-        private static List<Announcement> semesterAnnouncements = new List<Announcement>();
-        private static List<Announcement> unreadAnnouncements = new List<Announcement>();
-        public static List<Category> categories = new List<Category>();
-        private static int[] ids = new int[10];
-
-        const string CLIENT_ID = "5eb300b88d8d2917ed03198d";
-        const string CLIENT_SECRET = "0sy2579v41pxpap3on2e1uigumgrlsfj67pt5rthmbr13hohpw";
-
-        enum OutType { 
-            normal = 0,
-            error = 1,
-            success = 2,
-            alert = 3
-        }
-        private static void Out(string message,OutType outType = OutType.normal)
+        
+        /// <summary>
+        /// Entry point
+        /// </summary>
+        static async Task Main()
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write("[");
-            if (outType == OutType.normal)
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("~");
-                Console.ForegroundColor = ConsoleColor.White;
-            }else if (outType == OutType.error)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("~");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-            else if (outType == OutType.success)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("~");
-                Console.ForegroundColor = ConsoleColor.White;
-            }else if (outType == OutType.alert)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("!");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-            Console.Write("] ");
-            Console.WriteLine(message);
-        }
-        static async Task Main(string[] args)
-        {
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.Title = "AnnouncementHelper " + VERSION;
+
+            // Το httpClient χρησιμοποιεί proxy σαν default που το κάνει αργό
+            // οπότε το αφαιρούμε 
             HttpClientHandler hch = new HttpClientHandler
             {
                 Proxy = null,
@@ -72,20 +43,29 @@ namespace MyFirstTeitheApplication
             };
             client = new HttpClient(hch);
 
-            Console.OutputEncoding = Encoding.UTF8;
-            Out("Παρακαλώ δώστε εξουσιοδότηση στην εφαρμογή.");
-            Process.Start("https://login.it.teithe.gr/authorization/?client_id=" + CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
-            Out("Έπειτα, εισάγετε τον αριθμό \"code\" που βλέπετε:");
-            string code = Console.ReadLine();
-            access_token = await GetToken(code);
+            if (File.Exists(Environment.CurrentDirectory + "/refresh.token"))
+            {
+                StringEdit.Out("Βρέθηκε refresh token...");
+                await GetAccessTokenUsingRefresh(File.ReadAllText(Environment.CurrentDirectory + "/refresh.token"));
+            }
+            else
+            {
+                StringEdit.Out("Παρακαλώ δώστε εξουσιοδότηση στην εφαρμογή.");
+                StringEdit.Out("Έπειτα, εισάγετε τον αριθμό \"code\" που βλέπετε:");
+                Process.Start("https://login.it.teithe.gr/authorization/?client_id=" + CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
+                string code = Console.ReadLine();
+                access_token = await GetAccessToken(code);
+            }
+           
+
             if (access_token == "error")
             {
-                Out("Το πρόγραμμα τωρα θα τερματιστεί.", OutType.error);
+                StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", StringEdit.OutType.Error);
                 Console.ReadLine();
                 Environment.Exit(0);
             }
 
-            //Categories
+            // Load categories
             using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.it.teithe.gr/categories/"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", access_token);
@@ -98,27 +78,31 @@ namespace MyFirstTeitheApplication
                 int i = 0;
                 foreach (string s in vs)
                 {
+                    if (s.Contains("error"))
+                    {
+                        StringEdit.Out(s);
+                        Console.ReadLine();
+                    }
                     Category temp;
                     temp = JsonConvert.DeserializeObject<Category>(s);
-                    temp.index = i;
-                    categories.Add(temp);
+                    temp.Index = i;
+                    Categories.Add(temp);
                     i++;
                 }
+                if (Categories.Count > 0)
+                {
+                    StringEdit.Out("Περάστηκαν " + Categories.Count + " κατηγορίες ανακοινώσεων.", StringEdit.OutType.Success);
+                }
+                else
+                {
+                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη κατηγοριών ανακοινώσεων.", StringEdit.OutType.Error);
+                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", StringEdit.OutType.Error);
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+            }
 
-            }
-            if (categories.Count > 0)
-            {
-                Out("Περάστηκαν " + categories.Count + " κατηγορίες ανακοινώσεων.", OutType.success);
-            }
-            else
-            {
-                Out("Κάτι πήγε στραβά κατά την λήψη κατηγοριών ανακοινώσεων.", OutType.error);
-                Out("Το πρόγραμμα τωρα θα τερματιστεί.", OutType.error);
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-
-            //Profile
+            // Load user profile
             using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.it.teithe.gr/profile"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", access_token);
@@ -127,33 +111,19 @@ namespace MyFirstTeitheApplication
 
                 string responseString = await response.Content.ReadAsStringAsync();
                 userProfile = JsonConvert.DeserializeObject<Profile>(responseString);
-            }
-            if (userProfile.givenName == String.Empty)
-            {
-                Out("Κάτι πήγε στραβά κατά την λήψη profile.",OutType.error);
-                Out("Το πρόγραμμα τωρα θα τερματιστεί.", OutType.error);
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-            Out("Βρέθηκε εξάμηνο:" + userProfile.sem);
-            string semesterid = "";
-            foreach(Category c in categories)
-            {
-                if (c.name.ToLower().Contains(userProfile.sem + "ο"))
+                if (userProfile.GivenName == string.Empty)
                 {
-                    semesterid = c._id;
-                    break;
+                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη profile.", StringEdit.OutType.Error);
+                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", StringEdit.OutType.Error);
+                    Console.ReadLine();
+                    Environment.Exit(0);
                 }
             }
-            if (semesterid == "")
-            {
-                Out("Κάτι πήγε στραβά κατά την εύρεση της κατηγορίας του εξαμήνου σας.", OutType.error);
-                Out("Το πρόγραμμα τωρα θα τερματιστεί.", OutType.error);
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-            Out("Κατέβασμα ανακοινώσεων...");
+
+            StringEdit.Out("Βρέθηκε εξάμηνο:" + userProfile.Sem);
+            StringEdit.Out("Κατέβασμα ανακοινώσεων...");
             
+            // Load announcements
             using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.it.teithe.gr/announcements"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", access_token);
@@ -163,6 +133,7 @@ namespace MyFirstTeitheApplication
                     
                 responseString = responseString.Replace("},{", "}^{");
                 responseString = responseString.Substring(1, responseString.Length - 2);
+
                 string[] vs = responseString.Split('^');
                     
                 foreach (string s in vs)
@@ -170,61 +141,44 @@ namespace MyFirstTeitheApplication
                     Announcement temp = JsonConvert.DeserializeObject<Announcement>(s);
                     Announcements.Add(temp);
                 }
+
+                if (Announcements.Count > 0)
+                {
+                    StringEdit.Out("Κατέβηκαν " + Announcements.Count + " ανακοινώσεις.", StringEdit.OutType.Success);
+                }
+                else
+                {
+                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη ανακοινώσεων.", StringEdit.OutType.Error);
+                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", StringEdit.OutType.Error);
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
             }
-            Out("Κατέβηκαν " + Announcements.Count + " ανακοινώσεις.", OutType.success);
 
-
-            Thread organizerThread = new Thread(() => {
+            Thread organizerThread = new Thread(() =>
+            {
                 Application.Run(new Organizer());
-            });
-            organizerThread.IsBackground = true;
+            })
+            {
+                IsBackground = true
+            };
             organizerThread.Start();
 
-            /*
-            if (showAnnouncements)
-            {
-                foreach (Announcement a in Announcements)
-                {
-                    if (a._about == semesterid)
-                    {
-                        semesterAnnouncements.Add(a);
-                    }
-                }
-                Out("Βρέθηκαν " + semesterAnnouncements.Count + " ανακοινώσεις εξαμήνου.", OutType.success);
-                List<string> curIds;
-                curIds = new List<string>(File.ReadAllLines(Environment.CurrentDirectory + "/itconfig.cfg"));
-
-                for (int i = 0; i < 10; i++)
-                    if (!curIds.Contains(CreateMD5(semesterAnnouncements[i].Text)))
-                        unreadAnnouncements.Add(semesterAnnouncements[i]);
-
-                Out(unreadAnnouncements.Count.ToString() + " αδιάβαστες ανακοινώσεις (στις 10 πιο πρόσφατες)", OutType.alert);
-                Console.ReadLine();
-                for (int i = 0; i < unreadAnnouncements.Count; i++)
-                {
-                    PrintAnnouncement(unreadAnnouncements[i]);
-                    Console.ReadLine();
-                }
-            }
-            */
-            Out("Πατήστε enter για να τερματίσετε το πρόγραμμα.");
+            StringEdit.Out("Πατήστε enter για να τερματίσετε το πρόγραμμα.");
             Console.ReadLine();
         }
-        public static void ClearCurrentConsoleLine()
-        {
-            int currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, currentLineCursor);
-        }
-        private async static Task<string> GetToken(string code)
+
+        /// <summary>
+        /// Μετατροπή code που αποκτήθηκε απο authorization σε access_token
+        /// </summary>
+        private async static Task<string> GetAccessToken(string code)
         {
             var values = new Dictionary<string, string>
             {
                 { "client_id", CLIENT_ID },
                 { "client_secret", CLIENT_SECRET },
                 { "grant_type", "authorization_code" },
-                { "code" ,code}
+                { "code" , code }
             };
 
             var content = new FormUrlEncodedContent(values);
@@ -236,224 +190,68 @@ namespace MyFirstTeitheApplication
             MatchCollection matches = Regex.Matches(responseString, "\"([^\"]*)\"");
             if (matches.Count == 0)
             {
-                Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.",OutType.error);
+
+                StringEdit.Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.",StringEdit.OutType.Error);
                 return "error";
             }
             else
             {
                 if (matches[0].ToString().Contains("access_token"))
                 {
-                    Out("Access Token λήφθηκε!", OutType.success);
+                    StringEdit.Out("Access Token λήφθηκε!", StringEdit.OutType.Success);
+                    File.WriteAllText(Environment.CurrentDirectory + "/refresh.token", matches[5].ToString().Replace("\"", ""));
                     return matches[1].ToString().Replace("\"","");
                 }
                 else
                 {
-                    Out("Error σε μορφή JSON:" + matches[1].ToString());
+                    StringEdit.Out("Error σε μορφή JSON:" + Environment.NewLine + matches[2].ToString());
                     return "error";
                 }
             }
                
         }
-        public static string CreateMD5(string input)
+        private async static Task GetAccessTokenUsingRefresh(string code)
         {
-            // Use input string to calculate MD5 hash
-            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+            var values = new Dictionary<string, string>
             {
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
+                { "client_id", CLIENT_ID },
+                { "client_secret", CLIENT_SECRET },
+                { "grant_type", "refresh_token" },
+                { "code" , code }
+            };
 
-                // Convert the byte array to hexadecimal string
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    sb.Append(hashBytes[i].ToString("X2"));
-                }
-                return sb.ToString();
-            }
-        }
-        /*
-        private static void PrintAnnouncement(Announcement announcement)
-        {
-            //Seen
-            foreach (Announcement an in unreadAnnouncements)
+            var content = new FormUrlEncodedContent(values);
+
+            var response = await client.PostAsync("https://login.it.teithe.gr/token", content);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            MatchCollection matches = Regex.Matches(responseString, "\"([^\"]*)\"");
+            if (matches.Count == 0)
             {
-                string temp = CreateMD5(an.Text);
-                if (!new List<string>(File.ReadAllLines(Environment.CurrentDirectory + "/itconfig.cfg")).Contains(temp))
-                {
-                    File.AppendAllLines(Environment.CurrentDirectory + "/itconfig.cfg", new string[1] { temp });
-                }
-
+                StringEdit.Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.", StringEdit.OutType.Error);
             }
-            Console.Clear();
-            Out("+-------------------------------------------------+-----+");
-            Out("|" + announcement.Title.Substring(0, announcement.Title.Length > 46 ? 45 : announcement.Title.Length) + "... |" + announcement.category.Substring(0,5)+"|");
-            Out("+-------------------------------------------------+-----+");
-            int end = 55;
-            int start = 0;
-            announcement.editedtext = Regex.Replace(announcement.Text, @"\r\n?|\n", "");
-            do {
-                if (start + end < announcement.editedtext.Length)
-                Out("|" + announcement.editedtext.Substring(start, end) + "|");
+            else
+            {
+                if (matches[0].ToString().Contains("access_token"))
+                {
+                    StringEdit.Out("Access Token λήφθηκε μέσω refresh token!", StringEdit.OutType.Success);
+                    File.WriteAllText(Environment.CurrentDirectory + "/refresh.token", matches[5].ToString().Replace("\"", ""));
+                    access_token = matches[1].ToString().Replace("\"", "");
+                    return;
+                }
                 else
                 {
-                    string temptext = announcement.editedtext.Substring(start, announcement.editedtext.Length - start);
-                    int l = temptext.Length;
-                    for (int i = 0; i < 55 - l; i++)
-                    {
-                        temptext += " ";
-                    }
-                    Out("|" + temptext + "|");
-                    break;
+                    StringEdit.Out("Error σε μορφή JSON:" + Environment.NewLine + matches[2].ToString(),StringEdit.OutType.Error);
+                    StringEdit.Out("Λογικα έληξε το refresh_token");
+                    StringEdit.Out("Παρακαλώ ξαναδώστε εξουσιοδότηση");
+                    if (File.Exists(Environment.CurrentDirectory + "/refresh.token"))
+                        File.Delete(Environment.CurrentDirectory + "/refresh.token");
+                    Process.Start("https://login.it.teithe.gr/authorization/?client_id=" + CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
+                    access_token = await GetAccessToken(Console.ReadLine());
+                    return;
                 }
-                start += 55;
-            } while (true);
-
-            Out("+-------------------------------------------------------+");
-
-            ConsoleKey keyresponse;
-            do
-            {
-                Out("Θέλετε να ανοίξετε την ανακοίνωση σε νέο παράθυρο; (y/n)");
-                keyresponse = Console.ReadKey(false).Key;   // true is intercept key (dont show), false is show
-                Console.WriteLine();
-
-            } while (keyresponse != ConsoleKey.Y && keyresponse != ConsoleKey.N);
-            if (keyresponse == ConsoleKey.Y)
-            {
-                AnnouncementForm f1 = new AnnouncementForm(announcement);
-                f1.ShowDialog();
             }
-        }*/
-
-        public static string ReplaceGreek(string text,bool caseReplace,bool stressReplace,bool grammarReplace)
-        {
-            string result = text;
-            result = result.Replace("ς", "σ");
-            //Για πιο ευκολη αναζητηση, ακομα κιαν η ανακοινωση δεν εχει τονους
-            if (!stressReplace)
-            {
-                result = result.Replace("ά", "α");
-                result = result.Replace("ό", "ο");
-                result = result.Replace("έ", "ε");
-                result = result.Replace("ί", "ι");
-                result = result.Replace("ύ", "υ");
-                result = result.Replace("ή", "η");
-                result = result.Replace("ώ", "ω");
-                result = result.Replace("Ά", "Α");
-                result = result.Replace("Ό", "Ο");
-                result = result.Replace("Έ", "Ε");
-                result = result.Replace("Ί", "Ι");
-                result = result.Replace("Ύ", "Υ");
-                result = result.Replace("Ή", "Η");
-                result = result.Replace("Ώ", "Ω");
-            }
-            if (!caseReplace)
-                result = text.ToLower();
-            //Για πιο ευκολη αναζητηση, ακομα κιαν η ανακοινωση εχει γραμματικα λαθη
-            if (!grammarReplace)
-            {
-                result = result.Replace("ώ", "ο");
-                result = result.Replace("ω", "ο");
-                result = result.Replace("ή", "ι");
-                result = result.Replace("η", "ι");
-                result = result.Replace("ύ", "ι");
-                result = result.Replace("υ", "ι");
-                result = result.Replace("ει", "ι");
-                result = result.Replace("εί", "ι");
-                result = result.Replace("οι", "ι");
-                result = result.Replace("οί", "ι");
-                result = result.Replace("αί", "ε");
-                result = result.Replace("αι", "ι");
-            }
-
-            return result;
-        }
-   
-    } //end of class program
-
-
-    class Profile
-    {
-        public string uid
-        {
-            get;
-            set;
-        }
-        public string am
-        {
-            get;
-            set;
-        }
-        public string regyear
-        {
-            get;
-            set;
-        }
-        public string regsem
-        {
-            get;
-            set;
-        }
-        public string givenName
-        {
-            get;
-            set;
-        }
-        public string sn //Last name
-        {
-            get;
-            set;
-        }
-        public string cn //Full name
-        {
-            get;
-            set;
-        }
-        public string description //Full name
-        {
-            get;
-            set;
-        }
-        public string mail
-        {
-            get;
-            set;
-        }
-        public string sem
-        {
-            get;
-            set;
         }
     }
-    class Category
-    {
-        public int index
-        {
-            get;
-            set;
-        }
-        public string _id
-        {
-            get;
-            set;
-        }
-        public string name
-        {
-            get;
-            set;
-        }
-        public string nameEn
-        {
-            get;
-            set;
-        }
-        [JsonProperty(PropertyName = "public")]
-        public bool isPublic
-        {
-            get;
-            set;
-        }
-    }
- 
-
 }
