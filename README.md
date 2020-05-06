@@ -21,13 +21,13 @@ Clicking on an announcement will open AnnouncementForm for the announcement clic
 
 Features
 --------
-*Different date settings: All time, Last 3 months, Last month, This week
-*Display announcements made by specific teachers
-*Display announcements based on their semester
-*User-friendly search, that ignores Greek grammar, stressing, and is not case sensitive
-*Sort announcements based on Date, Title, Category or PublisherName
-*Display selected announcement on a new dialog window
-*Download announcements attachments
+* Different date settings: All time, Last 3 months, Last month, This week
+* Display announcements made by specific teachers
+* Display announcements based on their semester
+* User-friendly search, that ignores Greek grammar, stressing, and is not case sensitive
+* Sort announcements based on Date, Title, Category or PublisherName
+* Display selected announcement on a new dialog window
+* Download announcements attachments
 
 License
 -------
