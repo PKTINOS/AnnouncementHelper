@@ -15,8 +15,8 @@ Features
 
 Usage
 -----
-Upon starting the program, the user will be redirected to a login page (use users.it.teithe.gr credinitials) 
-After logging in you have to give the app permission, and it will redirect you to https://users.it.teithe.gr/~it185246/accepted.html.
+Upon starting the program, the user will be redirected to a login page (use users.it.teithe.gr credinitials)     
+After logging in you have to give the app permission, and it will redirect you to https://users.it.teithe.gr/~it185246/accepted.html:
 
 ![Accepted.html](https://i.imgur.com/FT2aHh4.png)
 
