@@ -8,16 +8,16 @@ Usage
 Upon starting the program, the user will be redirected to a login page (use users.it.teithe.gr credinitials) 
 After logging in you have to give the app permission, and it will redirect you to https://users.it.teithe.gr/~it185246/accepted.html.
 
-!(Accepted.html)[https://i.imgur.com/FT2aHh4.png]
+![Accepted.html](https://i.imgur.com/FT2aHh4.png)
 
 Copy the code provided using the "Copy code" button and paste it in the Console.
 When everything is loaded correctly "Organizer" will appear:
 
-!(Organizer)[https://i.imgur.com/Gc0gmXK.png]
+![Organizer](https://i.imgur.com/Gc0gmXK.png)
 
 Clicking on an announcement will open AnnouncementForm for the announcement clicked:
 
-!(AnnouncementForm)[https://i.imgur.com/Zy5ZCCJ.png]
+![AnnouncementForm](https://i.imgur.com/Zy5ZCCJ.png)
 
 Features
 --------
