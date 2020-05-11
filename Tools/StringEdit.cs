@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Drawing;
 using System.Text;
+using System.Windows.Forms;
 
 namespace AnnouncementHelper
 {
@@ -72,8 +74,10 @@ namespace AnnouncementHelper
         /// </summary>
         /// <param name="message">Το μήνυμα που θα εκτυπωθεί</param>
         /// <param name="outType">Συγκεκριμένο χρώμα ανάλογα με το OutType</param>
-        public static void Out(string message, OutType outType = OutType.Normal)
+        public static void Out(string message, ref RichTextBox richTextBox, OutType outType = OutType.Normal)
         {
+            #region consoleOut
+            /*
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("[");
             if (outType == OutType.Normal)
@@ -102,6 +106,31 @@ namespace AnnouncementHelper
             }
             Console.Write("] ");
             Console.WriteLine(message);
+            */
+            #endregion
+
+
+            Console.ForegroundColor = ConsoleColor.White;
+            richTextBox.AppendText("[", Color.White);
+            if (outType == OutType.Normal)
+            {
+                richTextBox.AppendText("~", Color.Gray);
+            }
+            else if (outType == OutType.Error)
+            {
+                richTextBox.AppendText("~", Color.Red);
+            }
+            else if (outType == OutType.Success)
+            {
+                richTextBox.AppendText("~", Color.Green);
+            }
+            else if (outType == OutType.Alert)
+            {
+                richTextBox.AppendText("~", Color.Yellow);
+            }
+            richTextBox.AppendText("]", Color.White);
+            richTextBox.AppendText(" " + message + Environment.NewLine, Color.White);
+
         }
         public static string CreateMD5(string input)
         {
