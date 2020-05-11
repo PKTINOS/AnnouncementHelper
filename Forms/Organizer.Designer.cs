@@ -1,4 +1,4 @@
-namespace AnnouncementHelper
+﻿namespace AnnouncementHelper
 {
     partial class Organizer
     {
@@ -54,6 +54,8 @@ namespace AnnouncementHelper
             this.SearchButton = new System.Windows.Forms.Button();
             this.SearchBar = new System.Windows.Forms.RichTextBox();
             this.OrganizerStrip = new System.Windows.Forms.MenuStrip();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addRemoveToStartupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.AnnouncementGridView)).BeginInit();
@@ -282,12 +284,28 @@ namespace AnnouncementHelper
             // OrganizerStrip
             // 
             this.OrganizerStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.OrganizerStrip.Location = new System.Drawing.Point(0, 0);
             this.OrganizerStrip.Name = "OrganizerStrip";
             this.OrganizerStrip.Size = new System.Drawing.Size(796, 24);
             this.OrganizerStrip.TabIndex = 19;
             this.OrganizerStrip.Text = "menuStrip1";
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addRemoveToStartupToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.settingsToolStripMenuItem.Text = "File";
+            // 
+            // addRemoveToStartupToolStripMenuItem
+            // 
+            this.addRemoveToStartupToolStripMenuItem.Name = "addRemoveToStartupToolStripMenuItem";
+            this.addRemoveToStartupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addRemoveToStartupToolStripMenuItem.Text = "Settings";
+            this.addRemoveToStartupToolStripMenuItem.Click += new System.EventHandler(this.SettingsToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -300,7 +318,7 @@ namespace AnnouncementHelper
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
@@ -370,5 +388,7 @@ namespace AnnouncementHelper
         private System.Windows.Forms.MenuStrip OrganizerStrip;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addRemoveToStartupToolStripMenuItem;
     }
 }

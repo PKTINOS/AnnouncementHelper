@@ -1,4 +1,4 @@
-using AnnouncementHelper.Forms;
+﻿using AnnouncementHelper.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,6 +15,7 @@ namespace AnnouncementHelper
         }
         private void Organizer_Load(object sender, EventArgs e)
         {
+            Text += " " + Program.VERSION;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             SearchButton.Text = char.ConvertFromUtf32(SearchButton.Text[0]);
@@ -196,6 +197,10 @@ namespace AnnouncementHelper
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new AboutBox().ShowDialog();
+        }
+        private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new Settings().ShowDialog();
         }
     }
 }

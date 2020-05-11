@@ -33,6 +33,8 @@
             this.PublisherLabel = new System.Windows.Forms.Label();
             this.DataTextbox = new System.Windows.Forms.RichTextBox();
             this.TitleTextbox = new System.Windows.Forms.RichTextBox();
+            this.ReminderSet = new System.Windows.Forms.Button();
+            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.SuspendLayout();
             // 
             // DateLabel
@@ -74,11 +76,30 @@
             this.TitleTextbox.TabIndex = 5;
             this.TitleTextbox.Text = "Title\nSecondLine\n";
             // 
+            // ReminderSet
+            // 
+            this.ReminderSet.Location = new System.Drawing.Point(431, 484);
+            this.ReminderSet.Name = "ReminderSet";
+            this.ReminderSet.Size = new System.Drawing.Size(124, 23);
+            this.ReminderSet.TabIndex = 6;
+            this.ReminderSet.Text = "Set a reminder";
+            this.ReminderSet.UseVisualStyleBackColor = true;
+            this.ReminderSet.Click += new System.EventHandler(this.ReminderSet_Click);
+            // 
+            // dateTimePicker1
+            // 
+            this.dateTimePicker1.Location = new System.Drawing.Point(226, 486);
+            this.dateTimePicker1.Name = "dateTimePicker1";
+            this.dateTimePicker1.Size = new System.Drawing.Size(200, 20);
+            this.dateTimePicker1.TabIndex = 7;
+            // 
             // AnnouncementForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(567, 520);
+            this.Controls.Add(this.dateTimePicker1);
+            this.Controls.Add(this.ReminderSet);
             this.Controls.Add(this.TitleTextbox);
             this.Controls.Add(this.DataTextbox);
             this.Controls.Add(this.PublisherLabel);
@@ -98,5 +119,7 @@
         private System.Windows.Forms.Label PublisherLabel;
         private System.Windows.Forms.RichTextBox DataTextbox;
         private System.Windows.Forms.RichTextBox TitleTextbox;
+        private System.Windows.Forms.Button ReminderSet;
+        private System.Windows.Forms.DateTimePicker dateTimePicker1;
     }
 }
