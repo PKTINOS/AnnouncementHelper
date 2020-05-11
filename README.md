@@ -12,6 +12,7 @@ Features
 * Sort announcements based on Date, Title, Category or PublisherName
 * Display selected announcement on a new dialog window
 * Download announcements attachments
+* Set announcements as reminders
 
 Usage
 -----
