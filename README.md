@@ -1,6 +1,6 @@
 AnnouncementHelper
 ========
-AnnouncemenetHelper is an open-source announcement viewer, searcher and organizer for students of https://www.iee.ihu.gr/.
+AnnouncementHelper is an open-source announcement viewer, searcher and organizer for students of https://www.iee.ihu.gr/.
 The goal is to help students find the announcements that matter to them.
 
 Features
