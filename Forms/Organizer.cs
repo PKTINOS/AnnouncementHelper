@@ -15,6 +15,8 @@ namespace AnnouncementHelper
         }
         private void Organizer_Load(object sender, EventArgs e)
         {
+            ShowInTaskbar = false;
+            ShowInTaskbar = true;
             Text += " " + Program.VERSION;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;

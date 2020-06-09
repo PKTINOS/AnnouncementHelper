@@ -30,6 +30,8 @@ namespace AnnouncementHelper.Forms
 
         private void Loader_Load(object sender, EventArgs e)
         {
+            ShowInTaskbar = false;
+            ShowInTaskbar = true;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             DoWork();
@@ -51,7 +53,7 @@ namespace AnnouncementHelper.Forms
                 if (filename.Contains("reminder"))
                 {
                     string date = filename.Split('_')[1].Split('T')[0];
-                    if (DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture) >= DateTime.Now.Date)
+                    if (DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture) <= DateTime.Now.Date)
                     {
                         StringEdit.Out("Βρέθηκε ανακοίνωση για σήμερα!",ref richTextBox1, StringEdit.OutType.Success);
                         await Task.Delay(1000);
