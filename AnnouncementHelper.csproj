@@ -146,6 +146,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Newtonsoft.Json.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="Resources\cropped-ihu-logo_el-16.png" />
     <Content Include="Resources\favicon.ico" />
   </ItemGroup>
