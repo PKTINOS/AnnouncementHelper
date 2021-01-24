@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace AnnouncementHelper
+namespace AnnouncementHelper.Tools
 {
     public static class StringEdit
     {
@@ -76,40 +76,6 @@ namespace AnnouncementHelper
         /// <param name="outType">Συγκεκριμένο χρώμα ανάλογα με το OutType</param>
         public static void Out(string message, ref RichTextBox richTextBox, OutType outType = OutType.Normal)
         {
-            #region consoleOut
-            /*
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write("[");
-            if (outType == OutType.Normal)
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("~");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-            else if (outType == OutType.Error)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("~");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-            else if (outType == OutType.Success)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("~");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-            else if (outType == OutType.Alert)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("!");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-            Console.Write("] ");
-            Console.WriteLine(message);
-            */
-            #endregion
-
-
             Console.ForegroundColor = ConsoleColor.White;
             richTextBox.AppendText("[", Color.White);
             if (outType == OutType.Normal)

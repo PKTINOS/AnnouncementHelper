@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AnnouncementHelper.Tools
 {
     public static class AnnouncementConvert
-    {   
-        public static string ToBase64 (Announcement announcement)
+    {
+        public static string ToBase64(Announcement announcement)
         {
             // Make a string to encode
             // with seperator ^ for each member
@@ -29,7 +26,7 @@ namespace AnnouncementHelper.Tools
         }
         public static Announcement FromBase64(string encodedAnnouncement)
         {
-            var base64EncodedBytes =Convert.FromBase64String(encodedAnnouncement);
+            var base64EncodedBytes = Convert.FromBase64String(encodedAnnouncement);
             string temp = Encoding.UTF8.GetString(base64EncodedBytes);
             string[] valueArray = temp.Split('^');
             Announcement announcement = new Announcement
@@ -49,7 +46,7 @@ namespace AnnouncementHelper.Tools
         }
         public static void CreateReminder(string date, string base64Announcement)
         {
-            File.WriteAllText(Environment.CurrentDirectory + "\\reminder_"+date, base64Announcement);
+            File.WriteAllText(Environment.CurrentDirectory + "\\reminder_" + date, base64Announcement);
         }
     }
 }
