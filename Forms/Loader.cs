@@ -4,15 +4,11 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,8 +26,7 @@ namespace AnnouncementHelper.Forms
 
         private void Loader_Load(object sender, EventArgs e)
         {
-            ShowInTaskbar = false;
-            ShowInTaskbar = true;
+            BackColor = Program.BgColor;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             DoWork();
@@ -46,7 +41,10 @@ namespace AnnouncementHelper.Forms
             {
                 Program.StartupEnabled = true;
             }
-            string[] files = Directory.GetFiles(Environment.CurrentDirectory);
+            if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\"))
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\");
+
+            string[] files = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\");
             foreach (string s in files)
             {
                 string filename = s.Split('\\').Last();
@@ -55,7 +53,7 @@ namespace AnnouncementHelper.Forms
                     string date = filename.Split('_')[1].Split('T')[0];
                     if (DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture) <= DateTime.Now.Date)
                     {
-                        StringEdit.Out("Βρέθηκε ανακοίνωση για σήμερα!",ref richTextBox1, StringEdit.OutType.Success);
+                        StringEdit.Out("Βρέθηκε ανακοίνωση για σήμερα!", ref richTextBox1, StringEdit.OutType.Success);
                         await Task.Delay(1000);
                         Announcement temp = AnnouncementConvert.FromBase64(File.ReadAllText(s));
                         File.Delete(s);
@@ -77,32 +75,33 @@ namespace AnnouncementHelper.Forms
             };
             client = new HttpClient(hch);
 
-            if (File.Exists(Environment.CurrentDirectory + "/refresh.token"))
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token"))
             {
-                StringEdit.Out("Βρέθηκε refresh token...",ref richTextBox1);
-                await GetAccessTokenUsingRefresh(File.ReadAllText(Environment.CurrentDirectory + "/refresh.token"));
+                StringEdit.Out("Βρέθηκε refresh token...", ref richTextBox1);
+                await GetAccessTokenUsingRefresh(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token"));
                 progressBar1.Value = 10;
             }
             else
             {
-                StringEdit.Out("Παρακαλώ δώστε εξουσιοδότηση στην εφαρμογή.",ref richTextBox1);
-                StringEdit.Out("Έπειτα, εισάγετε τον αριθμό \"code\" που βλέπετε:",ref richTextBox1);
-                Process.Start("https://login.it.teithe.gr/authorization/?client_id=" + Program.CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
+                StringEdit.Out("Παρακαλώ δώστε εξουσιοδότηση στην εφαρμογή.", ref richTextBox1);
+                StringEdit.Out("Έπειτα, εισάγετε τον αριθμό \"code\" που βλέπετε:", ref richTextBox1);
+                Process.Start("https://login.iee.ihu.gr/authorization/?client_id=" + Program.CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
+                Focus();
                 richTextBox1.Refresh();
-                string code = Interaction.InputBox("Code:", "Insert code","",0,0);
+                string code = Interaction.InputBox("Code:", "Insert code", "", 0, 0);
                 Program.access_token = await GetAccessToken(code);
                 progressBar1.Value = 10;
             }
 
             if (Program.access_token == "error")
             {
-                StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.",ref richTextBox1, StringEdit.OutType.Error);
+                StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", ref richTextBox1, StringEdit.OutType.Error);
                 await Task.Delay(2000);
                 Close();
             }
 
             // Load Program.Categories
-            using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.it.teithe.gr/categories/"))
+            using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.iee.ihu.gr/categories/"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", Program.access_token);
 
@@ -128,19 +127,19 @@ namespace AnnouncementHelper.Forms
                 }
                 if (Program.Categories.Count > 0)
                 {
-                    StringEdit.Out("Περάστηκαν " + Program.Categories.Count + " κατηγορίες ανακοινώσεων.",ref richTextBox1, StringEdit.OutType.Success);
+                    StringEdit.Out("Περάστηκαν " + Program.Categories.Count + " κατηγορίες ανακοινώσεων.", ref richTextBox1, StringEdit.OutType.Success);
                 }
                 else
                 {
-                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη κατηγοριών ανακοινώσεων.",ref richTextBox1, StringEdit.OutType.Error);
-                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.",ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη κατηγοριών ανακοινώσεων.", ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", ref richTextBox1, StringEdit.OutType.Error);
                     await Task.Delay(2000);
                     Close();
                 }
             }
             progressBar1.Value = 30;
             // Load user profile
-            using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.it.teithe.gr/profile"))
+            using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.iee.ihu.gr/profile"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", Program.access_token);
 
@@ -150,18 +149,18 @@ namespace AnnouncementHelper.Forms
                 Program.UserProfile = JsonConvert.DeserializeObject<Profile>(responseString);
                 if (Program.UserProfile.GivenName == string.Empty)
                 {
-                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη profile.",ref richTextBox1, StringEdit.OutType.Error);
-                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.",ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη profile.", ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", ref richTextBox1, StringEdit.OutType.Error);
                     await Task.Delay(2000);
                     Close();
                 }
             }
             progressBar1.Value = 55;
             StringEdit.Out("Βρέθηκε εξάμηνο:" + Program.UserProfile.Sem, ref richTextBox1);
-            StringEdit.Out("Κατέβασμα ανακοινώσεων...",ref richTextBox1);
+            StringEdit.Out("Κατέβασμα ανακοινώσεων...", ref richTextBox1);
 
             // Load announcements
-            using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.it.teithe.gr/announcements"))
+            using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.iee.ihu.gr/announcements"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", Program.access_token);
 
@@ -180,12 +179,12 @@ namespace AnnouncementHelper.Forms
                 }
                 if (Program.Announcements.Count > 0)
                 {
-                    StringEdit.Out("Κατέβηκαν " + Program.Announcements.Count + " ανακοινώσεις.",ref richTextBox1, StringEdit.OutType.Success);
+                    StringEdit.Out("Κατέβηκαν " + Program.Announcements.Count + " ανακοινώσεις.", ref richTextBox1, StringEdit.OutType.Success);
                 }
                 else
                 {
-                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη ανακοινώσεων.",ref richTextBox1, StringEdit.OutType.Error);
-                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.",ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Κάτι πήγε στραβά κατά την λήψη ανακοινώσεων.", ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Το πρόγραμμα τωρα θα τερματιστεί.", ref richTextBox1, StringEdit.OutType.Error);
                     await Task.Delay(2000);
                     Close();
                 }
@@ -210,34 +209,35 @@ namespace AnnouncementHelper.Forms
 
             var content = new FormUrlEncodedContent(values);
 
-            var response = await client.PostAsync("https://login.it.teithe.gr/token", content);
+            var response = await client.PostAsync("https://login.iee.ihu.gr/token", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
 
             MatchCollection matches = Regex.Matches(responseString, "\"([^\"]*)\"");
             if (matches.Count == 0)
             {
-                StringEdit.Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.",ref richTextBox1, StringEdit.OutType.Error);
+                StringEdit.Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.", ref richTextBox1, StringEdit.OutType.Error);
             }
             else
             {
                 if (matches[0].ToString().Contains("access_token"))
                 {
-                    StringEdit.Out("Access Token λήφθηκε μέσω refresh token!",ref richTextBox1, StringEdit.OutType.Success);
-                    File.WriteAllText(Environment.CurrentDirectory + "/refresh.token", matches[5].ToString().Replace("\"", ""));
+                    StringEdit.Out("Access Token λήφθηκε μέσω refresh token!", ref richTextBox1, StringEdit.OutType.Success);
+                    File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token", matches[5].ToString().Replace("\"", ""));
                     Program.access_token = matches[1].ToString().Replace("\"", "");
                     return;
                 }
                 else
                 {
-                    StringEdit.Out("Error σε μορφή JSON:" + Environment.NewLine + matches[2].ToString(),ref richTextBox1, StringEdit.OutType.Error);
-                    StringEdit.Out("Λογικα έληξε το refresh_token",ref richTextBox1);
-                    StringEdit.Out("Παρακαλώ ξαναδώστε εξουσιοδότηση",ref richTextBox1);
-                    if (File.Exists(Environment.CurrentDirectory + "/refresh.token"))
-                        File.Delete(Environment.CurrentDirectory + "/refresh.token");
-                    Process.Start("https://login.it.teithe.gr/authorization/?client_id=" + Program.CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.it.teithe.gr/~it185246/accepted.html");
+                    StringEdit.Out("Error σε μορφή JSON:" + Environment.NewLine + responseString, ref richTextBox1, StringEdit.OutType.Error);
+                    StringEdit.Out("Λογικα έληξε το refresh_token", ref richTextBox1);
+                    StringEdit.Out("Παρακαλώ ξαναδώστε εξουσιοδότηση", ref richTextBox1);
+                    if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token"))
+                        File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token");
+                    Process.Start("https://login.iee.ihu.gr/authorization/?client_id=" + Program.CLIENT_ID + "&response_type=code&scope=announcements,notifications,profile&redirect_uri=https://users.iee.ihu.gr/~it185246/accepted.html");
+                    Focus();
                     richTextBox1.Refresh();
-                    Program.access_token = await GetAccessToken(Interaction.InputBox("Code:", "Insert code","",0,0));
+                    Program.access_token = await GetAccessToken(Interaction.InputBox("Code:", "Insert code", "", 0, 0));
                     return;
                 }
             }
@@ -258,7 +258,7 @@ namespace AnnouncementHelper.Forms
 
             var content = new FormUrlEncodedContent(values);
 
-            var response = await client.PostAsync("https://login.it.teithe.gr/token", content);
+            var response = await client.PostAsync("https://login.iee.ihu.gr/token", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
 
@@ -266,20 +266,20 @@ namespace AnnouncementHelper.Forms
             if (matches.Count == 0)
             {
 
-                StringEdit.Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.",ref richTextBox1, StringEdit.OutType.Error);
+                StringEdit.Out("Δεν βρέθηκε JSON απάντηση κατά την προσπάθεια απόκτησης Access Token.", ref richTextBox1, StringEdit.OutType.Error);
                 return "error";
             }
             else
             {
                 if (matches[0].ToString().Contains("access_token"))
                 {
-                    StringEdit.Out("Access Token λήφθηκε!",ref richTextBox1, StringEdit.OutType.Success);
-                    File.WriteAllText(Environment.CurrentDirectory + "/refresh.token", matches[5].ToString().Replace("\"", ""));
+                    StringEdit.Out("Access Token λήφθηκε!", ref richTextBox1, StringEdit.OutType.Success);
+                    File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token", matches[5].ToString().Replace("\"", ""));
                     return matches[1].ToString().Replace("\"", "");
                 }
                 else
                 {
-                    StringEdit.Out("Error σε μορφή JSON:" + Environment.NewLine + matches[2].ToString(), ref richTextBox1);
+                    StringEdit.Out("Error σε μορφή JSON:" + Environment.NewLine + responseString, ref richTextBox1);
                     return "error";
                 }
             }

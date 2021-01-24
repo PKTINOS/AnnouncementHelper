@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AnnouncementHelper.Forms
@@ -101,6 +96,7 @@ namespace AnnouncementHelper.Forms
 
         private void AboutBox1_Load(object sender, EventArgs e)
         {
+            BackColor = Program.BgColor;
             AppName.Text += Program.VERSION;
         }
 

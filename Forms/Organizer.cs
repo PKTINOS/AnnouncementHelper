@@ -1,8 +1,10 @@
 ﻿using AnnouncementHelper.Forms;
+using AnnouncementHelper.Tools;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AnnouncementHelper
@@ -13,29 +15,35 @@ namespace AnnouncementHelper
         {
             InitializeComponent();
         }
+        public void SetColor()
+        {
+            BackColor = Program.BgColor;
+        }
         private void Organizer_Load(object sender, EventArgs e)
         {
-            ShowInTaskbar = false;
-            ShowInTaskbar = true;
+            AnnouncementGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            AnnouncementGridView.RowHeadersVisible = false;
+            SetColor();
             Text += " " + Program.VERSION;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             SearchButton.Text = char.ConvertFromUtf32(SearchButton.Text[0]);
-            DateSelectBox.SelectedIndex = 0;
+            DateSelectBox.SelectedIndex = 3;
 
-            int j = 0;
             foreach (Announcement a in Program.Announcements)
             {
-                AnnouncementGridView.Rows.Add(new object[] { j,a.Category,a.Title, a.Publisher.Name,a.Date.Split('T')[0],a.Attachments.Length});
+                if ((DateTime.Today - DateTime.ParseExact(a.Date.Split('T')[0], "yyyy-MM-dd", CultureInfo.InvariantCulture)).Days <= 7)
+                {
+                    int j = Program.Announcements.IndexOf(a);
+                    AnnouncementGridView.Rows.Add(new object[] { j, a.Category, a.Title, a.Publisher.Name, a.Date.Split('T')[0], a.Attachments.Length });
+                }
                 if (!PublisherListbox.Items.Contains(a.Publisher.Name))
                     PublisherListbox.Items.Add(a.Publisher.Name);
                 if (!CategoryListbox.Items.Contains(a.Category))
                     CategoryListbox.Items.Add(a.Category);
-                j++;
             }
-            AnnouncementGridView.Sort(AnnouncementGridView.Columns["Date"], ListSortDirection.Descending);
-            PublisherListbox.Sorted = true;
-            CategoryListbox.Sorted = true;
+            
+            
             for (int i = 0; i < PublisherListbox.Items.Count; i++)
             {
                 PublisherListbox.SetItemChecked(i, true);
@@ -44,6 +52,11 @@ namespace AnnouncementHelper
             {
                 CategoryListbox.SetItemChecked(i, true);
             }
+            PublisherListbox.Sorted = true;
+            CategoryListbox.Sorted = true;
+            AnnouncementGridView.Sort(AnnouncementGridView.Columns["Date"], ListSortDirection.Descending);
+            AnnouncementGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.EnableResizing;
+            AnnouncementGridView.RowHeadersVisible = true;
         }
         private void SelectAllPublisher_Click(object sender, EventArgs e)
         {
@@ -76,7 +89,8 @@ namespace AnnouncementHelper
                                 int j = Program.Announcements.IndexOf(a);
                                 AnnouncementGridView.Rows.Add(new object[] { j, a.Category, a.Title, a.Publisher.Name, a.Date.Split('T')[0], a.Attachments.Length });
                             }
-                        }else if (DateSelectBox.Text == "This month")
+                        }
+                        else if (DateSelectBox.Text == "This month")
                         {
                             if ((DateTime.Today - DateTime.ParseExact(a.Date.Split('T')[0], "yyyy-MM-dd", CultureInfo.InvariantCulture)).Days <= 31)
                             {
@@ -203,6 +217,12 @@ namespace AnnouncementHelper
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new Settings().ShowDialog();
+        }
+
+        private void ResetBgColor_Tick(object sender, EventArgs e)
+        {
+            if (BackColor != Program.BgColor)
+                BackColor = Program.BgColor;
         }
     }
 }

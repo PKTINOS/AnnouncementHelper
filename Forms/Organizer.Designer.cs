@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Organizer));
             this.AnnouncementGridView = new System.Windows.Forms.DataGridView();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,6 +59,7 @@
             this.addRemoveToStartupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ResetBgColor = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.AnnouncementGridView)).BeginInit();
             this.OrganizerStrip.SuspendLayout();
             this.SuspendLayout();
@@ -226,6 +228,8 @@
             // CaseCheckbox
             // 
             this.CaseCheckbox.AutoSize = true;
+            this.CaseCheckbox.Checked = true;
+            this.CaseCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.CaseCheckbox.Location = new System.Drawing.Point(604, 521);
             this.CaseCheckbox.Name = "CaseCheckbox";
             this.CaseCheckbox.Size = new System.Drawing.Size(102, 17);
@@ -236,6 +240,8 @@
             // StressCheckbox
             // 
             this.StressCheckbox.AutoSize = true;
+            this.StressCheckbox.Checked = true;
+            this.StressCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.StressCheckbox.Location = new System.Drawing.Point(604, 544);
             this.StressCheckbox.Name = "StressCheckbox";
             this.StressCheckbox.Size = new System.Drawing.Size(142, 17);
@@ -246,6 +252,8 @@
             // GrammarCheckbox
             // 
             this.GrammarCheckbox.AutoSize = true;
+            this.GrammarCheckbox.Checked = true;
+            this.GrammarCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.GrammarCheckbox.Location = new System.Drawing.Point(604, 567);
             this.GrammarCheckbox.Name = "GrammarCheckbox";
             this.GrammarCheckbox.Size = new System.Drawing.Size(171, 17);
@@ -303,7 +311,7 @@
             // addRemoveToStartupToolStripMenuItem
             // 
             this.addRemoveToStartupToolStripMenuItem.Name = "addRemoveToStartupToolStripMenuItem";
-            this.addRemoveToStartupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addRemoveToStartupToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.addRemoveToStartupToolStripMenuItem.Text = "Settings";
             this.addRemoveToStartupToolStripMenuItem.Click += new System.EventHandler(this.SettingsToolStripMenuItem_Click);
             // 
@@ -321,6 +329,12 @@
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
+            // 
+            // ResetBgColor
+            // 
+            this.ResetBgColor.Enabled = true;
+            this.ResetBgColor.Interval = 200;
+            this.ResetBgColor.Tick += new System.EventHandler(this.ResetBgColor_Tick);
             // 
             // Organizer
             // 
@@ -390,5 +404,6 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addRemoveToStartupToolStripMenuItem;
+        private System.Windows.Forms.Timer ResetBgColor;
     }
 }
