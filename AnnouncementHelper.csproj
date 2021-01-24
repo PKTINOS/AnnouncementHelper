@@ -115,6 +115,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Tools\AnnouncementConvert.cs" />
+    <Compile Include="Tools\SettingsManager.cs" />
     <Compile Include="Tools\StringEdit.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +125,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Forms\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AnnouncementForm.resx">
       <DependentUpon>AnnouncementForm.cs</DependentUpon>

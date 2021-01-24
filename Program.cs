@@ -1,21 +1,9 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using System.Linq;
-using System.Globalization;
+﻿using AnnouncementHelper.Forms;
 using AnnouncementHelper.Tools;
 using Microsoft.Win32;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Drawing;
-using AnnouncementHelper.Forms;
+using System.Windows.Forms;
 
 namespace AnnouncementHelper
 {
@@ -24,7 +12,7 @@ namespace AnnouncementHelper
         // Κωδικοί της εφαρμογής
         public const string CLIENT_ID = "5eb300b88d8d2917ed03198d";
         public const string CLIENT_SECRET = "0sy2579v41pxpap3on2e1uigumgrlsfj67pt5rthmbr13hohpw";
-        public const string VERSION = "1.0.3";
+        public const string VERSION = "1.0.4";
 
         public static List<Announcement> Announcements = new List<Announcement>();
         public static List<Category> Categories = new List<Category>();
@@ -34,12 +22,17 @@ namespace AnnouncementHelper
 
         public static bool StartupEnabled = false;
         public static bool HideMain = false;
-        
+
+        public static Color BgColor = Color.CornflowerBlue;
+
         /// <summary>
         /// Entry point
         /// </summary>
         static void Main()
         {
+            string colorcode = SettingsManager.GetGroup("Color");
+            if (colorcode != null && colorcode != "") 
+            BgColor = SettingsManager.StringToColor(colorcode);
             Application.Run(new Loader());
         }
         public static void SetStartup(bool set)
@@ -51,6 +44,7 @@ namespace AnnouncementHelper
                 rk.SetValue("AnnouncementHelper", Application.ExecutablePath);
             else
                 rk.DeleteValue("AnnouncementHelper", false);
+            StartupEnabled = set;
 
         }
     }
