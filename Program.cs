@@ -12,7 +12,7 @@ namespace AnnouncementHelper
         // Κωδικοί της εφαρμογής
         public const string CLIENT_ID = "5eb300b88d8d2917ed03198d";
         public const string CLIENT_SECRET = "0sy2579v41pxpap3on2e1uigumgrlsfj67pt5rthmbr13hohpw";
-        public const string VERSION = "1.0.4";
+        public const string VERSION = "1.1.0";
 
         public static List<Announcement> Announcements = new List<Announcement>();
         public static List<Category> Categories = new List<Category>();
