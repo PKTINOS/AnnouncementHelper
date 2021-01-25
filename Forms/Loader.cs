@@ -71,7 +71,7 @@ namespace AnnouncementHelper.Forms
             HttpClientHandler hch = new HttpClientHandler
             {
                 Proxy = null,
-                UseProxy = false
+                UseProxy = false,
             };
             client = new HttpClient(hch);
 
@@ -79,7 +79,6 @@ namespace AnnouncementHelper.Forms
             {
                 StringEdit.Out("Βρέθηκε refresh token...", ref richTextBox1);
                 await GetAccessTokenUsingRefresh(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\AnnouncementHelper\\refresh.token"));
-                progressBar1.Value = 10;
             }
             else
             {
@@ -90,7 +89,6 @@ namespace AnnouncementHelper.Forms
                 richTextBox1.Refresh();
                 string code = Interaction.InputBox("Code:", "Insert code", "", 0, 0);
                 Program.access_token = await GetAccessToken(code);
-                progressBar1.Value = 10;
             }
 
             if (Program.access_token == "error")
@@ -99,8 +97,18 @@ namespace AnnouncementHelper.Forms
                 await Task.Delay(2000);
                 Close();
             }
+            var task1 = LoadCategories();
+            var task2 = LoadUserProfile();
+            var task3 = LoadAnnouncements();
+            await Task.WhenAll(task1,task2,task3);
 
-            // Load Program.Categories
+            this.Hide();
+            var organizer = new Organizer();
+            organizer.Closed += (s, args) => this.Close();
+            organizer.Show();
+        }
+
+        private async Task LoadCategories(){
             using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.iee.ihu.gr/categories/"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", Program.access_token);
@@ -137,8 +145,9 @@ namespace AnnouncementHelper.Forms
                     Close();
                 }
             }
-            progressBar1.Value = 30;
-            // Load user profile
+        }
+
+        private async Task LoadUserProfile(){
             using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.iee.ihu.gr/profile"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", Program.access_token);
@@ -155,18 +164,17 @@ namespace AnnouncementHelper.Forms
                     Close();
                 }
             }
-            progressBar1.Value = 55;
             StringEdit.Out("Βρέθηκε εξάμηνο:" + Program.UserProfile.Sem, ref richTextBox1);
-            StringEdit.Out("Κατέβασμα ανακοινώσεων...", ref richTextBox1);
+        }
 
-            // Load announcements
+        private async Task LoadAnnouncements(){
+            StringEdit.Out("Κατέβασμα ανακοινώσεων...", ref richTextBox1);
             using (var request = new HttpRequestMessage(new HttpMethod("GET"), "http://api.iee.ihu.gr/announcements"))
             {
                 request.Headers.TryAddWithoutValidation("x-access-token", Program.access_token);
 
                 var response = await client.SendAsync(request);
                 string responseString = await response.Content.ReadAsStringAsync();
-                progressBar1.Value = 90;
                 responseString = responseString.Replace("},{", "}^{");
                 responseString = responseString.Substring(1, responseString.Length - 2);
 
@@ -189,12 +197,6 @@ namespace AnnouncementHelper.Forms
                     Close();
                 }
             }
-            progressBar1.Value = 100;
-            await Task.Delay(1000);
-            this.Hide();
-            var organizer = new Organizer();
-            organizer.Closed += (s, args) => this.Close();
-            organizer.Show();
         }
 
         private async Task GetAccessTokenUsingRefresh(string code)
